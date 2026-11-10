@@ -1,0 +1,216 @@
+---
+// One card on the Events & Competitions page. All fields come from src/data/events.json.
+export interface Event {
+  id: string;
+  name: string;
+  date: string; // YYYY-MM-DD, used for sorting
+  organizer: string;
+  type: 'competition' | 'hackathon' | 'conference' | 'workshop';
+  difficulty?: string;
+  result: string;
+  team?: string;
+  tech: string[];
+  description: string;
+  article?: string;
+  cover?: { src: string; webp?: string; width: number; height: number; alt: string };
+}
+
+interface Props {
+  event: Event;
+}
+
+const { event } = Astro.props;
+const TYPE_LABEL = { competition: 'Competition', hackathon: 'Hackathon', conference: 'Conference', workshop: 'Workshop' };
+const date = new Date(`${event.date}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<article class:list={['card', { 'card--cover': event.cover }]}>
+  {
+    event.cover && (
+      <picture class="cover">
+        {event.cover.webp && <source srcset={event.cover.webp} type="image/webp" />}
+        <img src={event.cover.src} alt={event.cover.alt} width={event.cover.width} height={event.cover.height} loading="lazy" decoding="async" />
+      </picture>
+    )
+  }
+  <div class="body">
+    <div class="top">
+      <span class="tag">{TYPE_LABEL[event.type]}</span>
+      <time datetime={event.date}>{date}</time>
+    </div>
+    <h3>{event.name}</h3>
+    <p class="organizer">{event.organizer}</p>
+    <p class="result">{event.result}</p>
+    <dl class="meta">
+      {event.team && (<div><dt>Team</dt><dd>{event.team}</dd></div>)}
+      {event.difficulty && (<div><dt>Level</dt><dd>{event.difficulty}</dd></div>)}
+    </dl>
+    <p class="description">{event.description}</p>
+    <div class="tags">
+      {event.tech.map((t) => <span class="tag">{t}</span>)}
+    </div>
+    {event.article && <a class="read" href={event.article}>Read the story ›</a>}
+    {/* The link stretches over the whole card, so a click anywhere on it opens the story */}
+  </div>
+</article>
+
+<style>
+  /* Same surface, radius and hover as the project cards; the photo on top, details under it */
+  .card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 28px;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    color: var(--card-text);
+    box-shadow: var(--card-shadow);
+    text-align: left;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease, background 0.4s ease;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    background: var(--card-bg-hover);
+    box-shadow: var(--card-shadow-hover);
+  }
+  /* Hover: lift, a little lighter, and a band of light sweeping across */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.12) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 0.9s ease;
+    pointer-events: none;
+  }
+  .card:hover::before {
+    transform: translateX(120%);
+  }
+
+  .card:has(.read) {
+    cursor: pointer;
+  }
+  /* With a cover photo: the photo on the left, at its own proportions, the details next to it */
+  .card--cover {
+    grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+    align-items: start;
+  }
+  .cover {
+    display: block;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.3);
+  }
+  .cover img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.6s ease;
+  }
+  .card:hover .cover img {
+    transform: scale(1.04);
+  }
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--card-muted);
+  }
+  .top .tag {
+    background: var(--card-tag);
+    color: var(--card-text);
+    border-color: transparent;
+  }
+  h3 {
+    font-size: 26px;
+  }
+  p {
+    margin: 0;
+  }
+  .organizer {
+    color: var(--card-muted);
+    font-size: 15px;
+    margin-top: -6px;
+  }
+  .result {
+    align-self: flex-start;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: var(--card-tag);
+    color: var(--card-text);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+    margin: 0;
+    font-size: 14px;
+  }
+  .meta div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .meta dt {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--card-muted);
+  }
+  .meta dd {
+    margin: 0;
+  }
+  .description {
+    color: var(--card-muted);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tags .tag {
+    background: var(--card-tag);
+    color: var(--card-text);
+    border-color: transparent;
+  }
+  .read {
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .read::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  /* Phones: the photo goes on top, cropped to a calmer height (never stretched) */
+  @media (max-width: 680px) {
+    .card,
+    .card--cover {
+      grid-template-columns: 1fr;
+      padding: 20px;
+      gap: 20px;
+    }
+    .cover img {
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      object-position: center 62%;
+    }
+  }
+</style>

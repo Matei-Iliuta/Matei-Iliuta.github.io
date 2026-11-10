@@ -1,0 +1,103 @@
+---
+import ScrollTop from '../components/ScrollTop.astro';
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Matei Iliuță, first-year electronics student at ETTI UPB. Learning C, wiring up boards, and trying to figure out why they work.',
+} = Astro.props;
+const fullTitle = title ? `${title} · Matei Iliuță` : 'Matei Iliuță';
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og.png', Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#121110" />
+    <link rel="canonical" href={canonical} />
+    <!-- Preview card when the link is shared on LinkedIn, WhatsApp, Discord... -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <ScrollTop />
+  </head>
+  <body>
+    <Nav />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      // Fade elements in as they scroll into view
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.15 },
+      );
+      document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+      // Hover effects, only with a real mouse and when motion is welcome
+      const pointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Cards: a light follows the cursor across the glass, and the card tilts a little
+      document.querySelectorAll<HTMLElement>('a.card, a.item').forEach((card) => {
+        card.addEventListener('pointermove', (e) => {
+          const r = card.getBoundingClientRect();
+          const x = e.clientX - r.left;
+          const y = e.clientY - r.top;
+          card.style.setProperty('--mx', `${x}px`);
+          card.style.setProperty('--my', `${y}px`);
+          if (!pointer || still) return;
+          const rx = (y / r.height - 0.5) * -4;
+          const ry = (x / r.width - 0.5) * 4;
+          card.style.transition = 'transform 0.12s ease-out, box-shadow 0.4s ease, background 0.4s ease';
+          card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-6px)`;
+        });
+        card.addEventListener('pointerleave', () => {
+          card.style.transition = '';
+          card.style.transform = '';
+        });
+      });
+
+      // Buttons lean towards the cursor
+      if (pointer && !still) {
+        document.querySelectorAll<HTMLElement>('.button').forEach((b) => {
+          b.addEventListener('pointermove', (e) => {
+            const r = b.getBoundingClientRect();
+            const dx = (e.clientX - r.left - r.width / 2) * 0.22;
+            const dy = (e.clientY - r.top - r.height / 2) * 0.32;
+            b.style.transform = `translate(${dx}px, ${dy}px)`;
+          });
+          b.addEventListener('pointerleave', () => (b.style.transform = ''));
+        });
+      }
+    </script>
+  </body>
+</html>

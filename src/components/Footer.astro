@@ -1,0 +1,39 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <span>© {year} Matei Iliuță</span>
+      <div class="links">
+        <a href="https://github.com/Matei-Iliuta" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/matei-iliu%C8%9B%C4%83-853561442" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* A slim bar the same width as the page content, always at the bottom of the screen */
+  footer {
+    margin-top: 80px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+  }
+  .links {
+    display: flex;
+    gap: 20px;
+  }
+  .links a {
+    color: var(--text-muted);
+  }
+</style>

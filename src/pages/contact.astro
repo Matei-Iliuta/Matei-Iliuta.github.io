@@ -1,0 +1,105 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Contact">
+  <section class="container contact">
+    <p class="eyebrow">Contact</p>
+    <h1>Say <span class="mark">hello.<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C 40 3, 90 11, 140 6 S 190 5, 198 7"></path></svg></span></h1>
+    <p class="lead">Projects, questions, or opportunities. I reply to everything.</p>
+
+    <div class="options">
+      <button class="option" id="email" type="button" data-user="mateiiliuta4" data-domain="gmail.com">
+        <span class="label">Email</span>
+        <span class="value" id="email-value">Click to show</span>
+      </button>
+      <a class="option" href="https://www.linkedin.com/in/matei-iliu%C8%9B%C4%83-853561442" target="_blank" rel="noopener">
+        <span class="label">LinkedIn</span>
+        <span class="value">Matei Iliuță ›</span>
+      </a>
+      <a class="option" href="https://github.com/Matei-Iliuta" target="_blank" rel="noopener">
+        <span class="label">GitHub</span>
+        <span class="value">Matei-Iliuta ›</span>
+      </a>
+      <a class="option" href="/cv/matei-iliuta-cv.pdf">
+        <span class="label">CV</span>
+        <span class="value">Download PDF ›</span>
+      </a>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // The address is assembled only on click, so scrapers reading the HTML don't find it
+  const button = document.getElementById('email') as HTMLButtonElement;
+  const value = document.getElementById('email-value') as HTMLSpanElement;
+  button.addEventListener('click', () => {
+    const address = `${button.dataset.user}@${button.dataset.domain}`;
+    if (value.textContent === address) {
+      window.location.href = `mailto:${address}`;
+    } else {
+      value.textContent = address;
+    }
+  });
+</script>
+
+<style>
+  .contact {
+    max-width: var(--text-col);
+    padding-top: 100px;
+  }
+  h1 {
+    font-size: var(--fs-page-h1);
+    margin: 12px 0 16px;
+  }
+  .lead {
+    font-size: var(--fs-lead);
+    color: var(--text-muted);
+    margin: 0 0 48px;
+  }
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .option {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 24px;
+    border: 1px solid var(--card-line);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--card-text);
+    box-shadow: var(--card-shadow);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.4s ease,
+      background 0.4s ease;
+  }
+  .option:hover {
+    text-decoration: none;
+    transform: translateY(-4px);
+    background: var(--card-bg-hover);
+    box-shadow: var(--card-shadow-hover);
+  }
+  .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--card-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .value {
+    font-size: 19px;
+    font-weight: 500;
+  }
+  @media (max-width: 600px) {
+    .options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

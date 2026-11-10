@@ -1,0 +1,39 @@
+[
+  {
+    "id": "aws-gameday-frugal-architect",
+    "name": "AWS GameDay – Frugal Architect",
+    "date": "2026-10-31",
+    "organizer": "AWS Student Builder Group UNSTPB, with the European Cloud & AI Skills Hub and AWS",
+    "type": "competition",
+    "difficulty": "Level 300 (Advanced)",
+    "result": "5th of 20+ teams · 115,343 points",
+    "team": "ETTeam · 4 members, 3 on site and 1 online",
+    "tech": [
+      "AWS EC2",
+      "Auto Scaling",
+      "Graviton",
+      "Spot Instances",
+      "Amazon SQS",
+      "Systems Manager Parameter Store",
+      "Aurora PostgreSQL",
+      "Amazon S3",
+      "Amazon EBS & Data Lifecycle Manager",
+      "AWS Config",
+      "CloudFront",
+      "AWS WAF",
+      "CloudWatch Logs",
+      "Amazon Data Firehose",
+      "AWS Lambda",
+      "API Gateway"
+    ],
+    "description": "A team competition where we cut the running costs of a real web application on AWS, following Werner Vogels' “The Frugal Architect” principles, while keeping it working and fast under constant traffic.",
+    "article": "/blog/aws-gameday-frugal-architect/",
+    "cover": {
+      "src": "/events/aws-gameday/gameday-laptop-proiector.jpg",
+      "webp": "/events/aws-gameday/gameday-laptop-proiector.webp",
+      "width": 1450,
+      "height": 2576,
+      "alt": "My laptop showing the full GameDay scoreboard next to the workshop page, the event projector in the background"
+    }
+  }
+]

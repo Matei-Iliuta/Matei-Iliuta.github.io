@@ -1,0 +1,92 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { title, summary, year, stack, status } = project.data;
+const label = status === 'completed' ? '✓ Completed' : 'In progress';
+---
+
+<a class="card reveal" href={`/projects/${project.id}/`}>
+  <div class="top">
+    <span class="year">{year}</span>
+    <span class:list={['status', { 'status--live': status === 'in-progress' }]}>{label}</span>
+  </div>
+  <h3>{title}</h3>
+  <p>{summary}</p>
+  <div class="tags">
+    {stack.map((tag) => <span class="tag">{tag}</span>)}
+  </div>
+</a>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    color: var(--card-text);
+    box-shadow: var(--card-shadow);
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease, background 0.4s ease;
+  }
+  .card:hover {
+    text-decoration: none;
+    transform: translateY(-6px);
+    background: var(--card-bg-hover);
+    box-shadow: var(--card-shadow-hover);
+  }
+  /* Hover: lift, a little lighter, and a band of light sweeping across */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.12) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 0.9s ease;
+    pointer-events: none;
+  }
+  .card:hover::before {
+    transform: translateX(120%);
+  }
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--card-muted);
+  }
+  .status {
+    color: var(--card-muted);
+    font-weight: 500;
+  }
+  .status--live {
+    color: #9cc08a;
+  }
+  h3 {
+    font-size: 24px;
+  }
+  p {
+    margin: 0;
+    color: var(--card-muted);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+  }
+  .tags .tag {
+    background: var(--card-tag);
+    color: var(--card-text);
+    border-color: transparent;
+  }
+</style>

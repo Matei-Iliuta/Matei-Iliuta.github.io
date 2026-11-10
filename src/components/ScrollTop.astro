@@ -1,0 +1,16 @@
+<script is:inline>
+  // Open every new page at the top. Back/forward and #links keep their position.
+  (function () {
+    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (location.hash || (nav && nav.type === 'back_forward')) return;
+    var top = function () {
+      var root = document.documentElement, prev = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      root.style.scrollBehavior = prev;
+    };
+    top();
+    window.addEventListener('DOMContentLoaded', top);
+    window.addEventListener('load', top);
+  })();
+</script>

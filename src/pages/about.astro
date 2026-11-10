@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="About">
+  <article class="container about">
+    <p class="eyebrow reveal">About</p>
+    <h1 class="reveal">I was the kid who took his <span class="mark">toys apart.<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C 40 3, 90 11, 140 6 S 190 5, 198 7"></path></svg></span></h1>
+    <div class="body">
+      <p class="reveal">
+        Not all of them went back together. The one I still remember was a frog-shaped calculator. I opened it up,
+        found a small green PCB, and couldn't understand how something that small could do math. I'm still working on
+        that question.
+      </p>
+      <p class="reveal">
+        In high school, everything went into the baccalaureate. University is the first time I get to spend my days on
+        what I actually like, and I'm making up for lost time. My first Arduino blinked an LED. My second project was
+        eight LEDs and their resistors, soldered by hand and programmed to light up in a cascade.
+      </p>
+    </div>
+
+    <div class="facts reveal">
+      <div>
+        <span class="label">Studying</span>
+        <span>Electronics, Telecommunications and IT, UPB (English)</span>
+      </div>
+      <div>
+        <span class="label">Learning</span>
+        <span>C, Arduino, soldering</span>
+      </div>
+      <div>
+        <span class="label">Languages</span>
+        <span>Romanian, English (C1), French (A2)</span>
+      </div>
+      <div>
+        <span class="label">Club</span>
+        <span>TechForge, ETTI's IT &amp; Robotics Club</span>
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .about {
+    max-width: var(--text-col);
+    padding-top: 100px;
+  }
+  h1 {
+    font-size: var(--fs-page-h1);
+    margin: 12px 0 40px;
+  }
+  .body p {
+    font-size: var(--fs-lead);
+    line-height: 1.6;
+    margin: 0 0 28px;
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+    margin-top: 64px;
+    padding: 32px;
+    border-radius: var(--radius);
+    background: var(--bg-soft);
+  }
+  .facts div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  @media (max-width: 600px) {
+    .facts {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

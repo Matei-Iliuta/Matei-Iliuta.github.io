@@ -1,0 +1,161 @@
+---
+// "Right now": every project with status in-progress. When a project's status
+// becomes completed, it leaves this section and shows up under Projects.
+import { getCollection } from 'astro:content';
+
+const live = (await getCollection('projects', (p) => p.data.status === 'in-progress' && !p.data.parent)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<section class="container now" id="right-now">
+  <h2 class="reveal">Right <span class="mark">now<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C 40 3, 90 11, 140 6 S 190 5, 198 7"></path></svg></span></h2>
+  <div class="grid">
+    {
+      live.map((project, i) => {
+        const p = project.data;
+        const current = p.steps.find((s) => s.state === 'doing');
+        return (
+          <a class="item reveal" href={`/projects/${project.id}/`} style={`transition-delay: ${i * 0.1}s`}>
+            <span class="sheen" aria-hidden="true" />
+            <div class="top">
+              <span class="live">
+                <span class="dot" />
+                Live
+              </span>
+              <span class="pct">{p.progress}%</span>
+            </div>
+            <h3>{p.title}</h3>
+            <p>{p.summary}</p>
+            {current && <p class="doing">Now: {current.label}</p>}
+            <div class="bar">
+              <div class="fill" style={`width: ${p.progress}%`} />
+            </div>
+          </a>
+        );
+      })
+    }
+  </div>
+</section>
+
+<style>
+  .now {
+    padding-top: 80px;
+    scroll-margin-top: 72px;
+  }
+  h2 {
+    font-size: var(--fs-h2);
+    margin-bottom: 28px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 20px;
+  }
+  .item {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 28px;
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    color: var(--card-text);
+    box-shadow: var(--card-shadow);
+    transition:
+      transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.4s ease,
+      background 0.4s ease,
+      opacity 0.8s ease;
+  }
+  .item:hover {
+    text-decoration: none;
+    transform: translateY(-6px);
+    background: var(--card-bg-hover);
+    box-shadow: var(--card-shadow-hover);
+  }
+  /* A soft band of light that sweeps across the card on hover */
+  .sheen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.14) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 0.9s ease;
+    pointer-events: none;
+  }
+  .item:hover .sheen {
+    transform: translateX(120%);
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px 4px 8px;
+    border-radius: 980px;
+    background: rgba(156, 192, 138, 0.14);
+    color: #b4d6a3;
+    font-weight: 600;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #5f7f4e;
+    animation: pulse 1.8s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(95, 127, 78, 0.6);
+    }
+    70% {
+      box-shadow: 0 0 0 9px rgba(95, 127, 78, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(95, 127, 78, 0);
+    }
+  }
+  .pct {
+    color: var(--card-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  h3 {
+    font-size: 22px;
+    margin-top: 6px;
+  }
+  p {
+    margin: 0;
+    color: var(--card-muted);
+  }
+  .doing {
+    font-size: 14px;
+    color: var(--card-text);
+  }
+  .bar {
+    height: 4px;
+    margin-top: auto;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%;
+    border-radius: 999px;
+    background: #8db37a;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dot {
+      animation: none;
+    }
+    .sheen {
+      display: none;
+    }
+  }
+</style>

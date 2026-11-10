@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Page not found" description="This page doesn't exist.">
+  <section class="container lost">
+    <p class="eyebrow">Error 404</p>
+    <h1>Open <span class="mark">circuit.<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C 40 3, 90 11, 140 6 S 190 5, 198 7"></path></svg></span></h1>
+    <p class="lead">Nothing is connected at this address. The link might be broken, or the page moved.</p>
+    <div class="actions">
+      <a class="button" href="/">Back home</a>
+      <a class="button secondary" href="/projects/">See projects</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .lost {
+    max-width: var(--text-col);
+    padding-top: 100px;
+  }
+  h1 {
+    font-size: var(--fs-page-h1);
+    margin: 12px 0 16px;
+  }
+  .lead {
+    font-size: var(--fs-lead);
+    color: var(--text-muted);
+    margin: 0 0 36px;
+  }
+  .actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+</style>

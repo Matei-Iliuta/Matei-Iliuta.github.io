@@ -1,0 +1,572 @@
+---
+import Article from '../../layouts/Article.astro';
+import data from '../../data/events.json';
+
+const img = '/events/aws-gameday';
+const event = data.find((e) => e.id === 'aws-gameday-frugal-architect') ?? data[0];
+
+// What we solved: all 18 tasks, grouped by the seven laws of The Frugal Architect.
+// `cut` is how much each one lowered the app's operational cost, as the GameDay reported it.
+const tasks = [
+  { law: 'I', area: 'EC2 · scheduled scaling', cut: '8%', title: 'Bastion hosts off outside working hours', text: 'The bastion hosts ran 24/7 for nothing. The Bastion Auto Scaling Group now scales to 0 at 5 pm UTC and back to 3 at 8 am UTC, about 15 hours saved a day.' },
+  { law: 'I', area: 'EC2 · Graviton', cut: '15%', title: 'Web servers on Graviton', text: 'We moved the production web servers from x86 to Graviton (ARM) and made sure any new instance launches on Graviton too. Same work, cheaper per hour.' },
+  { law: 'I', area: 'Aurora · Graviton', cut: '12%', title: 'Database on Graviton', text: 'The Aurora PostgreSQL cluster moved to Graviton instance types (db.r6g) while staying highly available, with as little downtime as possible.' },
+  { law: 'I', area: 'EC2 · right-sizing', cut: '10%', title: 'Right-sizing the web servers', text: 'CPU was stuck under 40%, so the instances were too big for the load. We changed the Auto Scaling Group until CPU sat between 40 and 60% and held there.' },
+  { law: 'II', area: 'SQS · Parameter Store', cut: '20%', title: 'Reports through a queue', text: 'The /fleet-report endpoint worked synchronously and wasted resources. We created an SQS queue and put its URL in Parameter Store, so the app now sends reports to the queue instead.' },
+  { law: 'II', area: 'EC2 · Auto Scaling', cut: '15%', title: 'Workers to process the queue', text: 'A worker Auto Scaling Group already existed but was scaled to 0. We scaled it up so workers pull messages from SQS and build the reports in the background.' },
+  { law: 'II', area: 'EC2 · Spot', cut: '25%', title: 'Workers on Spot Instances', text: 'The workers ran on expensive on-demand instances. We moved them to Spot: multiple AZs, price-capacity-optimized allocation, capacity rebalancing, at least 10 Graviton instance types.' },
+  { law: 'III', area: 'Parameter Store · CloudWatch', cut: '8%', title: 'Lower log levels', text: 'The web servers logged at DEBUG. We changed the level to INFO in Parameter Store and refreshed the instances, so CloudWatch ingests far less data.' },
+  { law: 'III', area: 'CloudWatch · Firehose · S3', cut: '12%', title: 'Archiving logs to S3', text: 'Logs now stream through Amazon Data Firehose into the logs/ prefix of the S3 bucket, and CloudWatch keeps only the last 3 days.' },
+  { law: 'III', area: 'S3 · lifecycle', cut: '8%', title: 'Old logs to Glacier', text: 'A lifecycle rule moves objects in logs/ to S3 Glacier Instant Retrieval after 3 days: much cheaper storage, still readable instantly.' },
+  { law: 'IV', area: 'AWS Config', cut: '3%', title: 'A compliance framework', text: 'A managed AWS Config rule now checks that EC2, RDS, S3, the load balancer and the Auto Scaling Groups carry the Application, Environment and Role tags.' },
+  { law: 'IV', area: 'Tagging', cut: '5%', title: 'Becoming compliant', text: 'We used the Config results to tag every non-compliant resource, so each cost can be traced back to what it belongs to.' },
+  { law: 'V', area: 'CloudFront · S3', cut: '12%', title: 'Static files through CloudFront', text: 'A CloudFront distribution with two origins: /static/* comes from S3, everything else from the load balancer. The EC2 instances stopped serving images and CSS.' },
+  { law: 'V', area: 'WAF', cut: '5%', title: 'Blocking bot traffic', text: 'A surge of bot traffic hit the new distribution. We found the pattern it targeted and blocked it with AWS WAF rules, without touching real users.' },
+  { law: 'VI', area: 'EBS · DLM', cut: '5%', title: 'Automatic EBS snapshots', text: 'A Data Lifecycle Manager policy takes daily snapshots of the production volumes and deletes them after 7 days.' },
+  { law: 'VI', area: 'EBS', cut: '3%', title: 'GP2 to GP3', text: 'We updated the launch template to GP3 and refreshed the instances: about 20% cheaper per GB, with performance no longer tied to size.' },
+  { law: 'VI', area: 'EBS · AWS Config', cut: '4%', title: 'Cleaning up unused volumes', text: 'We deleted the volumes no instance was using, then added an AWS Config rule that flags unattached volumes from now on.' },
+  { law: 'VII', area: 'Lambda · API Gateway', cut: '20%', title: 'Going serverless', text: "We rewrote the Flask app's /unicorn and /fleet-report endpoints on AWS Lambda behind API Gateway, handling the same 20+ requests per second." },
+];
+const LAWS: Record<string, string> = {
+  I: 'Make cost a non-functional requirement',
+  II: 'Systems that last align cost to business',
+  III: 'Architecting is a series of trade-offs',
+  IV: 'Unobserved systems lead to unknown costs',
+  V: 'Cost-aware architectures implement cost controls',
+  VI: 'Cost optimization is incremental',
+  VII: 'Unchallenged success leads to assumptions',
+};
+---
+
+<Article
+  title="My first AWS GameDay: 5th place"
+  description="A team competition on AWS: cut the costs of a real web app, following The Frugal Architect, without letting it slow down or break."
+  date={event.date}
+  kicker="Competition · 5th of 20+ teams"
+  meta={[
+    { label: 'Team', value: 'ETTeam · 4' },
+    { label: 'Level', value: '300 (Advanced)' },
+    { label: 'Score', value: '115,343 pts' },
+  ]}
+  stack={event.tech}
+>
+  <section class="section intro">
+    <h2 class="label">01 / WHAT A GAMEDAY IS</h2>
+    <div class="intro-grid">
+      <div class="intro-text">
+        <p>
+          An AWS GameDay is a team competition that runs inside real AWS accounts. You get a working application, a list of
+          tasks and a scoreboard. Points come from finishing tasks and from keeping the app healthy while traffic keeps hitting
+          it. Break something, or let it get slow, and you lose points every minute.
+        </p>
+        <p>
+          This one was themed on <em>The Frugal Architect</em>, Werner Vogels' set of principles for building systems where
+          cost is a design requirement, not something you look at after the bill arrives. Our job: make a real web app much
+          cheaper to run while it stayed up and fast under continuous traffic.
+        </p>
+        <p>
+          It was held in Bucharest on 31 October 2026, exclusively for students, organized by the AWS Student Builder Group
+          UNSTPB together with the European Cloud &amp; AI Skills Hub and AWS. We went as ETTeam: three of us in the room and one
+          teammate online.
+        </p>
+      </div>
+      <div class="intro-photos">
+      <figure class="photo zoomable fx">
+        <picture>
+          <source srcset={`${img}/gameday-poster.webp`} type="image/webp" />
+          <img
+            src={`${img}/gameday-poster.jpg`}
+            width="1024"
+            height="1536"
+            loading="lazy"
+            decoding="async"
+            alt="The AWS GameDay Hackathon poster: a low-poly unicorn, Bucharest skyline, 31 October 2026, exclusively for students, AWS Student Builder Group UNSTPB"
+          />
+        </picture>
+        <figcaption class="caption">The event poster.</figcaption>
+      </figure>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="label">02 / THE STARTING ARCHITECTURE</h2>
+    <p class="lead-text">A classic three-tier setup: a load balancer in front, web servers in an Auto Scaling Group, a database and object storage behind them.</p>
+    <figure class="arch" role="img" aria-label="Diagram: users go through a load balancer to EC2 instances in an Auto Scaling Group, which use Aurora PostgreSQL and Amazon S3">
+      <div class="arch-row">
+        <div class="node node--soft">Users</div>
+        <span class="arrow" aria-hidden="true"></span>
+        <div class="node">Load balancer</div>
+        <span class="arrow" aria-hidden="true"></span>
+        <div class="node node--group">
+          <span class="group-label">Auto Scaling Group</span>
+          <div class="ec2s"><span>EC2</span><span>EC2</span><span>EC2</span></div>
+        </div>
+        <span class="arrow" aria-hidden="true"></span>
+        <div class="stack">
+          <div class="node">Aurora PostgreSQL</div>
+          <div class="node">Amazon S3</div>
+        </div>
+      </div>
+    </figure>
+  </section>
+
+  <section class="section section--devlog">
+    <div class="devlog-head">
+      <h2 class="label">03 / WHAT WE SOLVED</h2>
+      <span class="devlog-count">{tasks.length} tasks · 7 laws</span>
+    </div>
+    <p class="lead-text">
+      Every task lowered the app's unit cost, what it costs to serve one request, and each request earned 200 points divided by
+      that cost. We finished with a unit cost of <strong>25.65</strong>, so every request was worth about 7.8 points.
+    </p>
+    <!-- Each law opens a new chapter on the line; its tasks alternate left and right under it -->
+    <ol class="devlog devlog--chapters devlog--folded" id="tasks">
+      {
+        tasks.map((t, i) => {
+          const first = i === 0 || tasks[i - 1].law !== t.law;
+          // Each chapter starts on the left again
+          const j = i - tasks.findIndex((x) => x.law === t.law);
+          // Only the first two laws show until "See all" is pressed
+          const more = Object.keys(LAWS).indexOf(t.law) >= 2;
+          return (
+            <>
+              {first && (
+                <li class:list={['chapter', { 'devlog-entry--more': more }]}>
+                  <span class="chapter-num">Law {t.law}</span>
+                  <span class="chapter-title">{LAWS[t.law]}</span>
+                </li>
+              )}
+              <li class:list={['devlog-entry', j % 2 ? 'side-right' : 'side-left', { 'after-chapter': first, 'devlog-entry--more': more }]}>
+                <span class="marker" />
+                <div class="entry-date">{t.area} · −{t.cut} cost</div>
+                <h3 class="entry-title">{t.title}</h3>
+                <p class="entry-text">{t.text}</p>
+              </li>
+            </>
+          );
+        })
+      }
+    </ol>
+    <button type="button" class="devlog-toggle" aria-controls="tasks" aria-expanded="false" data-more={`See all ${tasks.length} tasks`} data-less="Show less">
+      See all {tasks.length} tasks
+    </button>
+  </section>
+
+  <section class="section">
+    <h2 class="label">04 / THE HARD PARTS</h2>
+    <!-- The three problems stacked on the left, the room photo next to them -->
+    <div class="hard">
+    <div class="learned learned--stack">
+      <div class="learned-card">
+        <span class="learned-label">ONE OF US OFFLINE</span>
+        <p>Our online teammate had technical problems, so for a good part of the game we were effectively three.</p>
+      </div>
+      <div class="learned-card">
+        <span class="learned-label">ONE ACCOUNT, MANY HANDS</span>
+        <p>
+          Several of us worked in parallel in the same AWS account. Two people configured the same resource, or one took over a
+          terminal session someone else was using. That cost us time we didn't have.
+        </p>
+      </div>
+      <div class="learned-card">
+        <span class="learned-label">THE LONGEST ONE</span>
+        <p>
+          Right-sizing the web servers. Their CPU stayed under the 40% threshold, so they were too big for the load, and we paid a
+          penalty on every evaluation until we got it between 40 and 60%.
+        </p>
+      </div>
+    </div>
+    <figure class="photo photo--room zoomable fx">
+        <picture>
+          <source srcset={`${img}/gameday-sala-frugal-architect.webp`} type="image/webp" />
+          <img
+            src={`${img}/gameday-sala-frugal-architect.jpg`}
+            width="1450"
+            height="2576"
+            loading="lazy"
+            decoding="async"
+            alt="The lecture hall before the start: the Frugal Architect intro on the projector, my laptop open on the GameDay event page in front"
+          />
+        </picture>
+        <figcaption class="caption">The room, just before the start.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section section--why">
+    <h2 class="label">05 / WHAT I'D DO DIFFERENTLY</h2>
+    <p class="why">
+      Split the work clearly from the first minute: who owns which service, so nobody touches someone else's resources. And
+      only one person runs commands in the terminal at a time, with the others reading, checking and preparing the next step.
+    </p>
+  </section>
+
+  <section class="section">
+    <h2 class="label">06 / THE RESULT</h2>
+    <p class="lead-text">
+      <strong>5th place out of 20+ teams, with 115,343 points</strong>, about 2,200 points behind 4th. Close enough to know
+      exactly where those points went.
+    </p>
+    <div class="pair">
+      <figure class="photo photo--board zoomable fx">
+        <picture>
+          <source srcset={`${img}/gameday-clasament.webp`} type="image/webp" />
+          <img
+            src={`${img}/gameday-clasament.png`}
+            width="817"
+            height="418"
+            loading="lazy"
+            decoding="async"
+            alt="Final GameDay scoreboard showing the top 8 teams, with ETTeam in 5th place at 115,343 points"
+          />
+        </picture>
+        <figcaption class="caption">Final scoreboard, top 8.</figcaption>
+      </figure>
+      <figure class="photo photo--laptop zoomable fx">
+        <picture>
+          <source srcset={`${img}/gameday-laptop-proiector.webp`} type="image/webp" />
+          <img
+            src={`${img}/gameday-laptop-proiector.jpg`}
+            width="1450"
+            height="2576"
+            loading="lazy"
+            decoding="async"
+            alt="My laptop showing the full GameDay scoreboard next to the workshop page, the event projector in the background"
+          />
+        </picture>
+        <figcaption class="caption">On my laptop, right after the end.</figcaption>
+      </figure>
+    </div>
+  </section>
+</Article>
+
+<style>
+  p {
+    margin: 0;
+  }
+  .caption {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--pp-muted);
+  }
+  .intro-text p,
+  .lead-text {
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--pp-text-2);
+  }
+  .lead-text {
+    text-align: center;
+    max-width: 680px;
+    align-self: center;
+  }
+  /* Law chapters: a bold title centred on the line, then that law's tasks */
+  .chapter {
+    position: relative;
+    z-index: 1;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    max-width: 520px;
+    margin: 56px 0 36px;
+    padding: 18px 28px;
+    text-align: center;
+    background: var(--pp-surface);
+    border: 1px solid var(--pp-line-2);
+    border-radius: 16px;
+    box-shadow: 0 0 0 10px var(--pp-bg);
+  }
+  .chapter:first-child {
+    margin-top: 0;
+  }
+  .chapter-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #141210;
+    background: var(--accent);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+  .chapter-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--pp-text);
+  }
+  /* Sides set per task (the chapter rows would throw off nth-child) */
+  .devlog--chapters .devlog-entry.side-left {
+    margin-left: 0;
+    padding: 0 48px 0 0;
+    text-align: right;
+  }
+  .devlog--chapters .devlog-entry.side-right {
+    margin-left: 50%;
+    padding: 0 0 0 48px;
+    text-align: left;
+  }
+  .devlog--chapters .side-left .marker {
+    right: -5px;
+    left: auto;
+  }
+  .devlog--chapters .side-right .marker {
+    right: auto;
+    left: -4px;
+  }
+  .devlog--chapters .devlog-entry.after-chapter {
+    margin-top: 0;
+  }
+  @media (max-width: 720px) {
+    .chapter {
+      align-self: stretch;
+      align-items: flex-start;
+      text-align: left;
+      margin: 40px 0 28px;
+      padding: 16px 18px;
+    }
+    .chapter-title {
+      font-size: 19px;
+    }
+    .devlog--chapters .devlog-entry.side-left,
+    .devlog--chapters .devlog-entry.side-right {
+      margin-left: 0;
+      padding: 0 0 0 28px;
+      text-align: left;
+    }
+    .devlog--chapters .side-left .marker,
+    .devlog--chapters .side-right .marker {
+      left: 0;
+      right: auto;
+    }
+  }
+  .lead-text strong {
+    color: var(--pp-text);
+  }
+  .intro > .label {
+    margin-bottom: 8px;
+  }
+  /* Text on the left; the poster and the room photo stacked on the right.
+     The text stays in view (sticky) while the two pictures scroll past it. */
+  .intro-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+    gap: 56px;
+    align-items: start;
+  }
+  .intro-photos {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  /* Hard parts: the cards stacked on the left, the room photo filling the height next to them */
+  .hard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+    gap: 24px;
+    align-items: stretch;
+  }
+  .learned--stack {
+    grid-template-columns: 1fr;
+  }
+  .photo.photo--room picture {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+  }
+  .photo.photo--room img {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 66%; /* less ceiling, more of the laptop */
+  }
+  .intro-text {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: 32px;
+  }
+  .photo {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  .photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid var(--pp-line);
+    background: var(--pp-surface);
+  }
+
+  /* The two final pictures side by side, the same height: the scoreboard at its own
+     proportions, the laptop photo cropped (never stretched) to fill the space next to it */
+  .pair {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+  .photo--laptop picture {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+  }
+  .photo--laptop img {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 62%;
+  }
+  .photo--board picture {
+    display: block;
+  }
+
+  /* Architecture diagram drawn in HTML/CSS with the project-page palette */
+  .arch {
+    margin: 0;
+    padding: 32px 20px;
+    background: var(--pp-surface);
+    border: 1px solid var(--pp-line);
+    border-radius: 16px;
+  }
+  .arch-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .node {
+    padding: 12px 14px;
+    background: var(--pp-surface);
+    border: 1px solid var(--pp-line-2);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .node--soft {
+    background: transparent;
+    border-style: dashed;
+    color: var(--pp-muted);
+  }
+  .node--group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-style: dashed;
+    background: var(--pp-surface);
+  }
+  .group-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--pp-muted);
+  }
+  .ec2s {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+  .ec2s span {
+    padding: 6px 9px;
+    background: var(--pp-surface-2);
+    border: 1px solid var(--pp-line-2);
+    border-radius: 8px;
+    font-size: 12px;
+  }
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .arrow {
+    position: relative;
+    flex: 0 0 26px;
+    height: 2px;
+    background: var(--accent-ink);
+  }
+  .arrow::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -4px;
+    border: 5px solid transparent;
+    border-left: 7px solid var(--accent-ink);
+    border-right: 0;
+  }
+
+  @media (max-width: 760px) {
+    .intro-grid {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .intro-text {
+      position: static;
+    }
+    .hard {
+      grid-template-columns: 1fr;
+    }
+    .photo--room {
+      max-width: 360px;
+      width: 100%;
+      justify-self: center;
+    }
+    .photo.photo--room picture {
+      position: static;
+    }
+    .photo.photo--room img {
+      position: static;
+      height: auto;
+      aspect-ratio: 4 / 5;
+    }
+    .intro-photos {
+      max-width: 320px;
+      width: 100%;
+      justify-self: center;
+    }
+    .pair {
+      grid-template-columns: 1fr;
+    }
+    .photo--laptop picture {
+      position: static;
+    }
+    .photo--laptop img {
+      position: static;
+      height: auto;
+      aspect-ratio: 4 / 5;
+    }
+    .arch-row {
+      flex-direction: column;
+    }
+    .arrow {
+      flex: 0 0 22px;
+      width: 2px;
+      height: 22px;
+    }
+    .arrow::after {
+      right: auto;
+      left: -4px;
+      top: auto;
+      bottom: -1px;
+      border: 5px solid transparent;
+      border-top: 7px solid var(--accent-ink);
+      border-bottom: 0;
+    }
+    .stack {
+      flex-direction: row;
+    }
+  }
+</style>

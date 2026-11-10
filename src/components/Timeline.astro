@@ -1,0 +1,116 @@
+---
+// The story so far, newest first. Each year lists what actually happened.
+const years = [
+  {
+    year: '2026',
+    items: [
+      'Started Electronics, Telecommunications and IT at UPB, taught in English',
+    ],
+  },
+  {
+    year: '2025',
+    items: ['Volunteer at the International Olympiad on Astronomy and Astrophysics, Junior'],
+  },
+  {
+    year: '2024',
+    items: ['Tutored 8th graders in Math before their National Exam'],
+  },
+];
+---
+
+<section class="container timeline">
+  <h2 class="reveal">So <span class="mark">far<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C 40 3, 90 11, 140 6 S 190 5, 198 7"></path></svg></span></h2>
+  <ol class="trace">
+    {
+      years.map((entry) => (
+        <li class="reveal">
+          <span class="year">{entry.year}</span>
+          <ul>
+            {entry.items.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .timeline {
+    padding-top: 120px;
+  }
+  h2 {
+    font-size: var(--fs-h2);
+    margin-bottom: 40px;
+  }
+  /* Drawn like a PCB trace: the line grows as you scroll, each year is a via that lights up */
+  ol {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  ol::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--line);
+  }
+  ol > li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 24px;
+    padding: 0 0 44px 32px;
+  }
+  ol > li::before {
+    content: '';
+    position: absolute;
+    /* centred on the 2px line: 12px dot, so (12 - 2) / 2 to the left */
+    left: -5px;
+    top: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--line);
+    transition:
+      border-color 0.4s ease 0.3s,
+      background 0.4s ease 0.3s,
+      box-shadow 0.4s ease 0.3s;
+  }
+  ol > li:global(.visible)::before {
+    border-color: #5f7f4e;
+    background: #5f7f4e;
+    box-shadow: 0 0 0 4px rgba(95, 127, 78, 0.18);
+  }
+  .year {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 6px;
+  }
+  ul li {
+    font-size: 18px;
+    color: var(--text-muted);
+  }
+  @media (max-width: 600px) {
+    ol > li {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+  }
+</style>

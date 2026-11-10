@@ -1,0 +1,98 @@
+---
+import Base from '../layouts/Base.astro';
+import EventCard, { type Event } from '../components/EventCard.astro';
+import data from '../data/events.json';
+
+// Newest first. To add an event, add an entry to src/data/events.json.
+const events = ([...data] as Event[]).sort((a, b) => b.date.localeCompare(a.date));
+const fmt = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+---
+
+<Base title="Events & Competitions" description="Competitions, hackathons, conferences and workshops I've taken part in.">
+  <section class="container page">
+    <p class="eyebrow">Events &amp; Competitions</p>
+    <h1>Where I've <span class="mark">competed.<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C 40 3, 90 11, 140 6 S 190 5, 198 7"></path></svg></span></h1>
+    <p class="lead">Competitions, hackathons and workshops. What we built, how it went, and what I'd do differently.</p>
+    <!-- The cards, with a timeline running down the left side: a dot and the date for each event -->
+    <ol class="timeline">
+      {
+        events.map((event) => (
+          <li class="tl-item reveal">
+            <div class="tl-rail" aria-hidden="true">
+              <span class="tl-marker" />
+              <span class="tl-when">{fmt(event.date)}</span>
+            </div>
+            <EventCard event={event} />
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</Base>
+
+<style>
+  .page {
+    padding-top: 100px;
+  }
+  h1 {
+    font-size: var(--fs-page-h1);
+    margin: 12px 0 16px;
+  }
+  .lead {
+    font-size: var(--fs-lead);
+    color: var(--text-muted);
+    margin: 0 0 48px;
+    max-width: 40ch;
+  }
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .tl-item {
+    display: grid;
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 0 28px;
+  }
+  /* The line runs through every item, so it reads as one continuous rail */
+  .tl-rail {
+    position: relative;
+    border-right: 1px solid var(--line);
+  }
+  .tl-item:not(:last-child) > :global(.card) {
+    margin-bottom: 28px;
+  }
+  .tl-marker {
+    position: absolute;
+    top: 34px;
+    right: -6px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #5f7f4e;
+    box-shadow: 0 0 0 5px var(--bg);
+  }
+  .tl-when {
+    position: absolute;
+    top: 28px;
+    right: 22px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  /* Phones: a slim rail with just the dot; the date is already on the card */
+  @media (max-width: 680px) {
+    .tl-item {
+      grid-template-columns: 8px minmax(0, 1fr);
+      gap: 0 18px;
+    }
+    .tl-when {
+      display: none;
+    }
+  }
+</style>

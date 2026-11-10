@@ -1,0 +1,1178 @@
+/* Project detail page. Layout, spacing, sizes and fonts copied 1:1 from the reference
+   files (in-progress.html / completed.html). Colors re-themed to the site's warm white. */
+
+:root {
+  --accent: #9cc08a; /* deep sage green that sits well with the cream: dots, bars, markers */
+  --accent-ink: #dcc497; /* deep cream for text: readable on the cream background */
+  --pp-bg: #121110;
+  --pp-surface: #1c1a17;
+  --pp-surface-2: #23201c;
+  --pp-line: #2e2b26;
+  --pp-line-2: #37332d;
+  --pp-line-3: #423d35;
+  --pp-dash: #4d4840;
+  --pp-text: #f1e8d8;
+  --pp-text-2: #d4cbbb;
+  --pp-muted: #a69e91;
+  --pp-faint: #857e72;
+  --pp-live-bg: #1f1d19;
+  --pp-live-line: #3b362e;
+}
+
+.pp-body {
+  margin: 0;
+  color-scheme: dark;
+  background: var(--pp-bg);
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%; /* stop iOS from enlarging the code text */
+}
+
+.pp-body a {
+  color: var(--pp-text);
+}
+
+.pp-body a:hover {
+  color: #ffffff;
+}
+
+@keyframes livepulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(95, 127, 78, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(95, 127, 78, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(95, 127, 78, 0);
+  }
+}
+
+.live-dot {
+  animation: livepulse 1.8s ease-out infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor {
+  animation: blink 1s steps(1) infinite;
+}
+
+/* ----- Page frame ----- */
+
+.pp {
+  background: var(--pp-bg);
+  color: var(--pp-text);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 0 24px 64px;
+}
+
+/* Project pages don't load the site's global.css, so the width is set here */
+.pp-container {
+  max-width: clamp(960px, 68vw, 1200px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+
+/* Everything below the nav reads down a centre line */
+.pp-container > .pp-nav + .pp-header {
+  margin-top: 24px;
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ----- Nav ----- */
+
+.pp-nav {
+  /* Floating glass bar that stays at the top, so the way back is always one tap away */
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding: 4px 8px 4px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 248, 235, 0.14);
+  background: rgba(40, 37, 33, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(180%);
+  gap: 16px;
+}
+
+.pp-logo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.accent {
+  color: var(--accent-ink);
+}
+
+.pp-body a.pp-back {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--pp-text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(255, 248, 235, 0.1);
+  white-space: nowrap;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.pp-body a.pp-back:hover {
+  background: rgba(255, 248, 235, 0.18);
+}
+.pp-body a.pp-back:hover svg {
+  transform: translateX(-3px);
+}
+.pp-body a.pp-back svg {
+  transition: transform 0.3s ease;
+}
+
+/* ----- Header ----- */
+
+.pp-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px 6px 12px;
+  border-radius: 999px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+}
+
+.status--live {
+  gap: 10px;
+  border: 1px solid var(--pp-live-line);
+  background: var(--pp-live-bg);
+  color: var(--accent-ink);
+}
+
+.status--done {
+  gap: 8px;
+  border: 1px solid var(--pp-line-3);
+  background: var(--pp-surface-2);
+  color: var(--pp-text-2);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: block;
+}
+
+.pp-title {
+  margin: 0;
+  font-size: clamp(40px, 7vw, 72px);
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.pp-summary {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--pp-text-2);
+  max-width: 640px;
+}
+
+.meta {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px 40px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--pp-muted);
+  padding-top: 8px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-label {
+  color: var(--pp-faint);
+}
+
+.meta-value {
+  color: var(--pp-text);
+}
+
+.chips {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 2px 10px;
+  border: 1px solid var(--pp-line-3);
+  border-radius: 6px;
+  color: var(--pp-text);
+}
+
+/* ----- Hero ----- */
+
+.hero {
+  margin: -24px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 960px;
+  align-self: center;
+}
+
+.caption {
+  text-align: center;
+}
+
+.placeholder {
+  border: 1px dashed var(--pp-dash);
+  background: var(--pp-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--pp-faint);
+}
+
+.hero-media {
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+}
+
+.hero-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.hero-pair .hero-media {
+  aspect-ratio: 4 / 3;
+}
+@media (max-width: 640px) {
+  .hero-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero-media--video {
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hero-media img,
+.hero-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.play {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px solid var(--pp-dash);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-ink);
+}
+
+.caption {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--pp-faint);
+}
+
+/* ----- Result ----- */
+
+.result {
+  max-width: 960px;
+  width: 100%;
+  box-sizing: border-box;
+  align-self: center;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  border-radius: 16px;
+  border: 1px solid var(--pp-live-line);
+  background: var(--pp-live-bg);
+}
+
+.result p {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.55;
+  color: var(--pp-text);
+  max-width: 680px;
+}
+
+/* Changes after v1, for projects that keep evolving */
+.updates {
+  max-width: 760px;
+  width: 100%;
+  box-sizing: border-box;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 26px;
+  border-radius: 16px;
+  border: 1px solid var(--pp-line);
+  background: var(--pp-surface);
+}
+.updates-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.updates-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--pp-muted);
+}
+.updates-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.updates-list li {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 14px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--pp-text-2);
+}
+.update-date {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  color: var(--pp-muted);
+  padding-top: 2px;
+}
+@media (max-width: 560px) {
+  .updates-list li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+/* ----- Sections, all centred ----- */
+
+.section--why {
+  align-items: center;
+  text-align: center;
+  max-width: 680px;
+  align-self: center;
+}
+
+/* At a glance: progress and parts side by side, under the photo */
+.glance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 960px;
+  align-self: center;
+  align-items: start;
+}
+
+.glance .github {
+  margin-top: 6px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 960px;
+  align-self: center;
+}
+
+.section > .label,
+.devlog-head {
+  align-self: center;
+  text-align: center;
+}
+
+.section--devlog {
+  gap: 40px;
+}
+
+.section--how {
+  gap: 20px;
+}
+
+.label {
+  margin: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--accent-ink);
+}
+
+.label--muted {
+  color: var(--pp-muted);
+}
+
+.why {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--pp-text-2);
+}
+
+/* ----- Devlog ----- */
+
+.devlog-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.devlog-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--pp-faint);
+}
+
+/* The line runs down the middle; entries take turns on the left and the right of it */
+.devlog {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.devlog::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--pp-line-2);
+}
+
+.devlog-entry {
+  position: relative;
+  width: 50%;
+  box-sizing: border-box;
+  padding: 0 48px 0 0;
+  text-align: right;
+}
+
+.devlog-entry:nth-child(even) {
+  margin-left: 50%;
+  padding: 0 0 0 48px;
+  text-align: left;
+}
+
+/* Each entry starts a little above where the one before it ends, so the two sides interlock */
+.devlog-entry + .devlog-entry {
+  margin-top: -40px;
+}
+
+.marker {
+  position: absolute;
+  right: -5px;
+  top: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--pp-dash);
+  display: block;
+}
+
+.marker--live {
+  background: var(--accent);
+}
+
+.devlog-entry:nth-child(even) .marker {
+  right: auto;
+  left: -4px;
+}
+
+.marker--done {
+  right: -7px;
+  top: 4px;
+  width: 13px;
+  height: 13px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #141210;
+}
+
+.entry-date {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--pp-muted);
+  margin-bottom: 6px;
+}
+
+.entry-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.entry-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--pp-text-2);
+}
+
+/* A photo under a devlog entry: rounded, soft shadow, gentle zoom on hover, click to enlarge */
+.entry-photo {
+  margin: 14px 0 0;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+}
+.entry-photo picture {
+  display: block;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 18px 36px -24px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--pp-line);
+}
+.entry-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  cursor: zoom-in;
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.entry-photo:hover img {
+  transform: scale(1.04);
+}
+.entry-photo figcaption {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--pp-muted);
+  text-align: center !important;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(29, 27, 22, 0.82);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  cursor: zoom-out;
+}
+.lightbox.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.lightbox img {
+  max-width: min(100%, 1200px);
+  max-height: 100%;
+  border-radius: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .entry-photo img {
+    transition: none;
+  }
+}
+
+/* Short / Full switch for the devlog */
+.devlog-modes {
+  display: inline-flex;
+  gap: 2px;
+  margin-top: 6px;
+  padding: 3px;
+  border: 1px solid var(--pp-line);
+  border-radius: 980px;
+  background: var(--pp-surface);
+}
+.devlog-modes button {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 980px;
+  background: transparent;
+  color: var(--pp-muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.devlog-modes button[aria-pressed='true'] {
+  background: var(--pp-text);
+  color: var(--pp-bg);
+}
+.devlog-modes button:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+.entry-short {
+  display: none;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--pp-muted);
+}
+/* Short view: every entry shows its one-liner; only key entries keep their photo */
+.devlog--short .has-short .entry-text,
+.devlog--short .devlog-entry:not(.devlog-entry--key) .entry-photo {
+  display: none;
+}
+.devlog--short .has-short .entry-short {
+  display: block;
+}
+.devlog--short .devlog-entry--key .entry-short {
+  color: var(--pp-text-2);
+}
+
+/* Link from a finished project to the page where it keeps changing */
+.evolving-link {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border: 1px solid var(--pp-line);
+  border-radius: 980px;
+  background: var(--pp-surface);
+  color: var(--pp-text);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.evolving-link:hover {
+  transform: translateY(-1px);
+}
+
+/* Long devlogs start folded; the button opens the rest */
+.devlog--folded .devlog-entry--more {
+  display: none;
+}
+.devlog--folded::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, var(--pp-bg));
+  pointer-events: none;
+}
+.devlog-toggle {
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  margin: 28px auto 0;
+  padding: 11px 22px;
+  border: 1px solid var(--pp-line);
+  border-radius: 980px;
+  background: var(--pp-surface);
+  color: var(--pp-text);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.devlog-toggle[hidden] {
+  display: none;
+}
+.devlog-toggle:hover {
+  transform: translateY(-1px);
+}
+
+/* Three key facts for skimmers */
+.key-facts {
+  list-style: none;
+  margin: 18px auto 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.key-fact {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 980px;
+  background: var(--pp-live-bg);
+  border: 1px solid var(--pp-live-line);
+  color: var(--pp-text);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.key-dot {
+  display: none;
+}
+
+/* Components: one folder per part of a bigger project */
+.parts-lead {
+  margin: 0 0 20px;
+  color: var(--pp-muted);
+  text-align: center;
+}
+.folders {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 760px;
+  display: grid;
+  gap: 12px;
+}
+.folder {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 22px;
+  border: 1px solid var(--pp-line);
+  border-radius: 16px;
+  background: var(--pp-surface);
+  color: var(--pp-text);
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.folder:hover {
+  transform: translateY(-2px);
+  border-color: var(--pp-line-3);
+  box-shadow: 0 16px 32px -24px rgba(0, 0, 0, 0.3);
+}
+.folder-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--pp-live-bg);
+  border: 1px solid var(--pp-live-line);
+  color: var(--accent-ink);
+}
+.folder-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.folder-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--pp-faint);
+}
+.folder-status {
+  color: var(--accent);
+}
+.folder-status--done {
+  color: var(--pp-muted);
+}
+.folder-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.folder-summary {
+  color: var(--pp-text-2);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.folder-go {
+  font-size: 20px;
+  color: var(--pp-faint);
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+.folder:hover .folder-go {
+  transform: translateX(3px);
+  color: var(--pp-text);
+}
+@media (max-width: 560px) {
+  .folder {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 18px;
+  }
+  .folder-icon {
+    display: none;
+  }
+}
+
+/* ----- How it works ----- */
+
+.how {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* Grid items default to the width of their content; this lets long code scroll inside its box
+   instead of pushing the page wider than the phone */
+.how > *,
+.glance > *,
+.learned > * {
+  min-width: 0;
+}
+
+.how .schematic {
+  aspect-ratio: auto;
+  min-height: 260px;
+}
+
+.how--stacked {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.how--stacked .schematic {
+  aspect-ratio: 16 / 8;
+  min-height: 0; /* with the aspect ratio, a min-height would force the box wider than a phone */
+}
+
+/* A real image keeps its own proportions and fills the width, centred (Safari won't size an
+   image by percentage height inside an aspect-ratio box) */
+.how .schematic--img {
+  aspect-ratio: auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.how .schematic--img img {
+  width: 100%;
+  height: auto;
+}
+
+.schematic {
+  aspect-ratio: 16 / 8;
+  border-radius: 12px;
+}
+
+.schematic img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+  border: 1px solid var(--pp-line);
+}
+
+.code {
+  margin: 0;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-line);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--pp-text-2);
+  overflow-x: auto;
+}
+
+/* ----- What I learned ----- */
+
+.learned {
+  width: 100%;
+  max-width: 960px;
+  align-self: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 16px;
+}
+
+.learned-card {
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.learned-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--pp-muted);
+}
+
+.learned-card p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* ----- Sidebar ----- */
+
+.panel {
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-line);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel--tight {
+  gap: 14px;
+}
+
+.bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--pp-line);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.bar--full {
+  background: var(--accent);
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.step {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--pp-text-2);
+}
+
+.step--done {
+  color: var(--pp-muted);
+}
+
+.step--done .step-text {
+  text-decoration: line-through;
+}
+
+.step--doing {
+  color: var(--accent-ink);
+  font-weight: 500;
+}
+
+.step--doing .dot {
+  margin: 0 5px;
+}
+
+.milestone-text {
+  flex: 1;
+}
+
+.milestone-date {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--pp-faint);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.metric-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--pp-muted);
+}
+
+.parts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--pp-text-2);
+}
+
+.part {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.part-qty {
+  color: var(--pp-faint);
+}
+
+.github {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 24px;
+  min-height: 44px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  border: 1px solid var(--pp-line-3);
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ----- Footer ----- */
+
+.pp-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 32px;
+  border-top: 1px solid var(--pp-line);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+}
+
+.pp-footer a {
+  text-decoration: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.pp-body .pp-footer a.pp-footer-back {
+  color: var(--pp-muted);
+}
+
+/* Phones: back to a single column, the devlog line on the left */
+@media (max-width: 720px) {
+  .pp-container {
+    gap: 56px;
+  }
+  .code {
+    font-size: 12px;
+  }
+  .devlog::before {
+    left: 4px;
+  }
+  .devlog-entry,
+  .devlog-entry:nth-child(even) {
+    width: auto;
+    margin-left: 0;
+    padding: 0 0 0 28px;
+    text-align: left;
+  }
+  .devlog-entry + .devlog-entry {
+    margin-top: 28px;
+  }
+  .marker,
+  .devlog-entry:nth-child(even) .marker {
+    left: 0;
+    right: auto;
+  }
+  .marker--done {
+    left: -2px;
+  }
+}
+
+.devlog {
+  scroll-margin-top: 110px;
+}
+
+/* Pulling past the top or bottom on a phone shows the same dark colour, not a white edge */
+html {
+  background: #121110;
+  overscroll-behavior-y: none;
+}
+
+/* The narrowest phones: the floating bar still fits on one line */
+@media (max-width: 400px) {
+  .pp-nav {
+    padding-left: 14px;
+    gap: 8px;
+  }
+  .pp-logo {
+    font-size: 13px;
+  }
+  .pp-body a.pp-back {
+    font-size: 12px;
+    padding: 0 11px;
+    gap: 6px;
+    min-width: 0;
+  }
+}

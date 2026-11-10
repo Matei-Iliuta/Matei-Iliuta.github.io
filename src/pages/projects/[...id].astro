@@ -1,0 +1,433 @@
+---
+import ScrollTop from '../../components/ScrollTop.astro';
+// One template for every project page. The `status` field in the project's
+// Markdown file switches between the in-progress and the completed version.
+import { getCollection } from 'astro:content';
+import '../../styles/project.css';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  const top = all.filter((x) => !x.data.parent);
+  return all.map((project) => {
+    // Next project: among the top-level projects, or among the parts of the same project
+    const ring = project.data.parent ? all.filter((x) => x.data.parent === project.data.parent) : top;
+    const i = ring.indexOf(project);
+    const parent = project.data.parent ? all.find((x) => x.id === project.data.parent) : undefined;
+    const children = all.filter((x) => x.data.parent === project.id);
+    return {
+      params: { id: project.id },
+      props: { project, next: ring[(i + 1) % ring.length], parent, children },
+    };
+  });
+}
+
+const { project, next, parent, children } = Astro.props;
+const p = { ...project.data, devlog: project.data.devlog.filter((e) => !e.siteOnly) };
+const done = p.status === 'completed';
+
+const back = parent
+  ? { href: `/projects/${parent.id}/`, label: `Back to ${parent.data.title}` }
+  : done
+    ? { href: '/projects/', label: 'Back to Projects' }
+    : { href: '/#right-now', label: 'Back to Right now' };
+// Section numbers shift by one when the project has a Components section
+const n = (k: number) => String(k + (children.length && k >= 2 ? 1 : 0)).padStart(2, '0');
+const nextLabel = parent ? (next.id === project.id ? '' : 'Next part →') : 'Next project →';
+const devlogCount = p.devlog.length + (done && p.finalEntry ? 1 : 0);
+// Long logs start folded: the newest entries show, the rest open with a button
+const SHOW = 3;
+const shownLogs = Math.max(0, SHOW - (done && p.finalEntry ? 1 : 0));
+const folds = devlogCount > SHOW + 1;
+// Short / Full switch: only when the log is long enough and has one-line summaries
+const hasShort = p.devlog.length >= 4 && p.devlog.some((e) => e.short);
+const githubHref = p.github?.startsWith('http') ? p.github : '#';
+// Short code sits next to the schematic; long lines need the full width, so they stack
+const wideCode = Math.max(...p.code.split('\n').map((l) => l.length)) > 56;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{p.title} · Matei Iliuță</title>
+    <meta name="description" content={p.summary} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    />
+    <ScrollTop />
+  </head>
+  <body class="pp-body">
+    <div class="pp">
+      <div class="pp-container">
+        <nav class="pp-nav" aria-label="Site">
+          <a href="/" class="pp-logo">matei<span class="accent">_</span></a>
+          <a href={back.href} class="pp-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+            {back.label}
+          </a>
+        </nav>
+
+        <header class="pp-header">
+          {
+            done ? (
+              <div class="status status--done">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
+                Completed
+              </div>
+            ) : (
+              <div class="status status--live">
+                <span class="dot live-dot" />
+                In progress
+              </div>
+            )
+          }
+
+          <h1 class="pp-title">{p.title}{!done && <span class="cursor accent">_</span>}</h1>
+          <p class="pp-summary">{p.summary}</p>
+          {p.keyFacts.length > 0 && (
+            <ul class="key-facts" aria-label="Key facts">
+              {p.keyFacts.map((f, i) => <li class="key-fact">{i > 0 && <span class="key-dot" aria-hidden="true">·</span>}{f}</li>)}
+            </ul>
+          )}
+
+          <div class="meta">
+            <div class="meta-item"><span class="meta-label">STARTED</span><span class="meta-value">{p.started}</span></div>
+            {
+              done ? (
+                <>
+                  <div class="meta-item"><span class="meta-label">FINISHED</span><span class="meta-value">{p.finished ?? '[Date]'}</span></div>
+                  {p.duration && <div class="meta-item"><span class="meta-label">DURATION</span><span class="meta-value">{p.duration}</span></div>}
+                </>
+              ) : (
+                <div class="meta-item"><span class="meta-label">LAST UPDATED</span><span class="meta-value">{p.lastUpdated ?? '[Date]'}</span></div>
+              )
+            }
+            <div class="meta-item">
+              <span class="meta-label">STACK</span>
+              <div class="chips">{p.stack.map((s) => <span class="chip">{s}</span>)}</div>
+            </div>
+          </div>
+        </header>
+
+        <figure class="hero">
+          {
+            done && !p.hero.video && p.hero.photo ? (
+              p.hero.photo2 ? (
+                <div class="hero-pair">
+                  <div class="hero-media"><img src={p.hero.photo} alt={`${p.title}, the finished build`} /></div>
+                  <div class="hero-media"><img src={p.hero.photo2} alt={p.hero.photo2Alt ?? `${p.title}, another view`} /></div>
+                </div>
+              ) : (
+                <div class="hero-media">
+                  <img src={p.hero.photo} alt={`${p.title}, the finished build`} />
+                </div>
+              )
+            ) : done ? (
+              p.hero.video ? (
+                <div class="hero-media">
+                  <video src={p.hero.video} controls playsinline preload="metadata" />
+                </div>
+              ) : (
+                <div class="placeholder hero-media hero-media--video">
+                  <span class="play">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+                  </span>
+                  {p.hero.videoPlaceholder}
+                </div>
+              )
+            ) : p.hero.photo ? (
+              <div class="hero-media">
+                <img src={p.hero.photo} alt={`${p.title}, current state of the build`} />
+              </div>
+            ) : (
+              <div class="placeholder hero-media">{p.hero.photoPlaceholder}</div>
+            )
+          }
+          <figcaption class="caption">{done && p.hero.video ? p.hero.videoCaption : p.hero.photoCaption}</figcaption>
+        </figure>
+
+        {
+          done && (
+            <section class="result">
+              <h2 class="label">RESULT</h2>
+              <p>{p.result ?? '[What the finished project does, in two or three sentences. The first thing someone reads after the title.]'}</p>
+            </section>
+          )
+        }
+
+        {
+          done && p.updates.length > 0 && (
+            <a class="evolving-link" href="/site/">
+              <span class="live-dot" aria-hidden="true" />
+              Still evolving: see what I keep changing on it
+              <span aria-hidden="true">→</span>
+            </a>
+          )
+        }
+
+        <section class="section section--why">
+          <h2 class="label">01 / WHY</h2>
+          <p class="why">{p.why}</p>
+        </section>
+
+        <!-- At a glance: progress (or results and milestones), parts and the code, side by side -->
+        <div class="glance">
+          {
+            done ? (
+              <>
+                <div class="panel panel--tight">
+                  <h2 class="label label--muted">RESULTS</h2>
+                  {(p.metrics.length ? p.metrics : [
+                    { value: '[value]', label: '[real metric, e.g. refresh rate]' },
+                    { value: '[value]', label: '[real metric, e.g. power draw]' },
+                  ]).map((m) => (
+                    <div class="metric">
+                      <span class="metric-value">{m.value}</span>
+                      <span class="metric-label">{m.label}</span>
+                    </div>
+                  ))}
+                </div>
+                <div class="panel">
+                  <h2 class="label label--muted">MILESTONES</h2>
+                  <div class="bar bar--full" />
+                  <ul class="steps">
+                    {p.steps.map((s) => (
+                      <li class="step">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
+                        <span class="milestone-text">{s.label}</span>
+                        <span class="milestone-date">{s.date}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            ) : (
+              <div class="panel">
+                <h2 class="label label--muted">PROGRESS</h2>
+                <div class="bar"><div class="bar-fill" style={`width: ${p.progress}%`} /></div>
+                <ul class="steps">
+                  {p.steps.map((s) =>
+                    s.state === 'done' ? (
+                      <li class="step step--done">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
+                        <span class="step-text">{s.label}</span>
+                      </li>
+                    ) : s.state === 'doing' ? (
+                      <li class="step step--doing">
+                        <span class="dot live-dot" />
+                        {s.label}
+                      </li>
+                    ) : (
+                      <li class="step">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8" /></svg>
+                        {s.label}
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </div>
+            )
+          }
+
+          <div class="panel panel--tight">
+            <h2 class="label label--muted">PARTS</h2>
+            <ul class="parts">
+              {p.parts.map((part) => (
+                <li class="part"><span>{part.name}</span><span class="part-qty">{part.qty}</span></li>
+              ))}
+            </ul>
+            <a href={githubHref} class="github" target="_blank" rel="noopener">
+              View on GitHub
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M8 7h9v9"></path></svg>
+            </a>
+          </div>
+        </div>
+
+        {children.length > 0 && (
+          <section class="section section--parts">
+            <div class="devlog-head">
+              <h2 class="label">02 / COMPONENTS</h2>
+              <span class="devlog-count">one folder per part · {children.length} so far</span>
+            </div>
+            <p class="parts-lead">Every part is built and understood on its own first, then added to the robot.</p>
+            <ul class="folders">
+              {children.map((c, i) => (
+                <li>
+                  <a class="folder" href={`/projects/${c.id}/`}>
+                    <span class="folder-icon" aria-hidden="true">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z" /></svg>
+                    </span>
+                    <span class="folder-body">
+                      <span class="folder-top">
+                        <span class="folder-num">{String(i + 1).padStart(2, '0')}</span>
+                        <span class:list={['folder-status', { 'folder-status--done': c.data.status === 'completed' }]}>
+                          {c.data.status === 'completed' ? '✓ Done' : 'In progress'}
+                        </span>
+                      </span>
+                      <span class="folder-title">{c.data.title}</span>
+                      <span class="folder-summary">{c.data.summary}</span>
+                    </span>
+                    <span class="folder-go" aria-hidden="true">→</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section class="section section--devlog">
+          <div class="devlog-head">
+            <h2 class="label">{n(2)} / DEVLOG</h2>
+            {done && <span class="devlog-count">full history · {devlogCount} entries</span>}
+            {hasShort && (
+              <div class="devlog-modes" role="group" aria-label="Devlog length">
+                <button type="button" data-mode="short" aria-pressed="true">Short</button>
+                <button type="button" data-mode="full" aria-pressed="false">Full</button>
+              </div>
+            )}
+          </div>
+          <!-- A line down the middle, entries alternating left and right of it -->
+          <ol class:list={['devlog', { 'devlog--folded': folds && !hasShort, 'devlog--short': hasShort }]} id="devlog" data-folds={folds ? 'true' : 'false'}>
+            {
+              done && p.finalEntry && (
+                <li class:list={['devlog-entry', 'devlog-entry--key', { 'has-short': !!p.finalEntry.short }]}>
+                  <span class="marker marker--done">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
+                  </span>
+                  <div class="entry-date">{p.finalEntry.date} · finished</div>
+                  <h3 class="entry-title">{p.finalEntry.title}</h3>
+                  <p class="entry-text">{p.finalEntry.text}</p>
+                  {p.finalEntry.short && <p class="entry-short">{p.finalEntry.short}</p>}
+                </li>
+              )
+            }
+            {
+              p.devlog.map((entry, i) => {
+                const latest = !done && i === 0;
+                return (
+                  <li class:list={['devlog-entry', { 'devlog-entry--more': folds && i >= shownLogs, 'devlog-entry--key': entry.key, 'has-short': !!entry.short }]}>
+                    <span class:list={['marker', { 'marker--live live-dot': latest }]} />
+                    <div class="entry-date">{entry.date}{latest && ' · latest'}</div>
+                    <h3 class="entry-title">{entry.title}</h3>
+                    <p class="entry-text">{entry.text}</p>
+                    {entry.short && <p class="entry-short">{entry.short}</p>}
+                    {entry.photo && (
+                      <figure class="entry-photo">
+                        <picture>
+                          {entry.photo.webp && <source srcset={entry.photo.webp} type="image/webp" />}
+                          <img src={entry.photo.src} width={entry.photo.width} height={entry.photo.height} alt={entry.photo.alt} loading="lazy" decoding="async" />
+                        </picture>
+                        {entry.photo.caption && <figcaption>{entry.photo.caption}</figcaption>}
+                      </figure>
+                    )}
+                  </li>
+                );
+              })
+            }
+          </ol>
+          {folds && (
+            <button type="button" class="devlog-toggle" aria-controls="devlog" aria-expanded="false" hidden={hasShort} data-more={`Show full build log (${devlogCount} entries)`} data-less="Show less">
+              Show full build log ({devlogCount} entries)
+            </button>
+          )}
+        </section>
+
+        <section class="section section--how">
+          <h2 class="label">{n(3)} / HOW IT WORKS</h2>
+          <div class:list={['how', { 'how--stacked': wideCode }]}>
+            {
+              p.schematic ? (
+                <div class="schematic schematic--img">
+                  <img src={p.schematic} alt={`Schematic of ${p.title}`} />
+                </div>
+              ) : (
+                <div class="placeholder schematic">{done ? '[Final schematic]' : p.schematicPlaceholder}</div>
+              )
+            }
+            <pre class="code"><code>{p.code.trimEnd()}</code></pre>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="label">{n(4)} / WHAT I LEARNED</h2>
+          <div class="learned">
+            <div class="learned-card">
+              <span class="learned-label">PROBLEM</span>
+              <p>{p.problem}</p>
+            </div>
+            <div class="learned-card">
+              <span class="learned-label">LESSON</span>
+              <p>{p.lesson}</p>
+            </div>
+          </div>
+        </section>
+
+        <footer class="pp-footer">
+          <a href={back.href} class="pp-footer-back">← {back.label}</a>
+          {nextLabel && <a href={`/projects/${next.id}/`}>{nextLabel}</a>}
+        </footer>
+      </div>
+    </div>
+    <script>
+      // Short / Full devlog: Short shows the key entries in full and one line for the rest
+      const modes = document.querySelectorAll<HTMLButtonElement>('.devlog-modes button');
+      modes.forEach((b) =>
+        b.addEventListener('click', () => {
+          const log = document.getElementById('devlog');
+          const fold = document.querySelector<HTMLButtonElement>('.devlog-toggle');
+          if (!log) return;
+          const full = b.dataset.mode === 'full';
+          modes.forEach((m) => m.setAttribute('aria-pressed', String(m === b)));
+          log.classList.toggle('devlog--short', !full);
+          // Full starts folded again, with its "Show full build log" button
+          const folds = log.dataset.folds === 'true';
+          log.classList.toggle('devlog--folded', full && folds);
+          if (fold) {
+            fold.hidden = !(full && folds);
+            fold.setAttribute('aria-expanded', 'false');
+            fold.textContent = fold.dataset.more ?? '';
+          }
+        }),
+      );
+
+      // Fold / unfold the long devlog
+      const toggle = document.querySelector<HTMLButtonElement>('.devlog-toggle');
+      const log = document.getElementById('devlog');
+      if (toggle && log) {
+        toggle.addEventListener('click', () => {
+          const open = log.classList.toggle('devlog--folded') === false;
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.textContent = (open ? toggle.dataset.less : toggle.dataset.more) ?? '';
+          if (!open) log.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+
+      // Click a devlog photo to see it full size; click again or press Esc to close
+      const photos = document.querySelectorAll<HTMLImageElement>('.entry-photo img');
+      if (photos.length) {
+        const box = document.createElement('div');
+        box.className = 'lightbox';
+        box.setAttribute('role', 'dialog');
+        box.setAttribute('aria-label', 'Photo, full size');
+        const big = document.createElement('img');
+      big.alt = '';
+        box.append(big);
+        document.body.append(box);
+        const close = () => box.classList.remove('open');
+        box.addEventListener('click', close);
+        document.addEventListener('keydown', (e) => e.key === 'Escape' && close());
+        photos.forEach((img) =>
+          img.addEventListener('click', () => {
+            big.src = img.currentSrc || img.src;
+            big.alt = img.alt;
+            box.classList.add('open');
+          }),
+        );
+      }
+    </script>
+  </body>
+</html>
