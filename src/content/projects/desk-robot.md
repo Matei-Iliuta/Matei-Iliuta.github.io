@@ -1,25 +1,43 @@
 ---
 title: Desk Robot
-summary: A small robot that lives on my desk. It turns its head towards me, shows its mood on two OLED eyes, reacts when I touch its head and understands spoken commands on the chip itself.
-keyFacts: ['Voice on the chip', 'Built part by part', 'Clear acrylic body']
+summary: A personal assistant robot for my desk that keeps track of my day with me. It greets me in the morning and when I walk in, shows a face and small screens, and sums up my day at night.
+keyFacts: ['Built part by part', '2 sensors so far', 'Arduino Uno, then ESP32']
 status: in-progress
 order: 3
 year: 2026
 started: 3 Nov 2026
-lastUpdated: 9 Nov 2026
-stack: [C/C++, Arduino, ESP32, TinyML]
+lastUpdated: 15 Nov 2026
+stack: [C/C++, Arduino, ESP32]
 
 hero:
   photoPlaceholder: '[Photo of the robot, once the first parts come together]'
   photoCaption: Starting with the senses, one part at a time.
 
 why: >-
-  After the LED cascade I wanted one big project that pulls everything together instead of many small ones.
-  A desk robot does exactly that: sensors, servos, screens, sound, a touch sensor and on-device voice recognition,
-  all in one thing I can actually use every day. Each part teaches one new piece of embedded work, and the
-  robot is where they have to work together.
+  After the LED cascade I wanted one big project that pulls everything together instead of many small ones, and
+  something I would actually use every day. In the morning it tells me the weather and my plan, it greets me when
+  I come into the room, it wakes up when I touch its head, and at night it tells me how much of my plan I got done.
+  Each part teaches one new piece of embedded work, and the robot is where they have to work together.
 
 devlog:
+  - date: 15 Nov 2026
+    title: 'Second part: the motion sensor'
+    short: 'Added a PIR motion sensor that notices when I walk in. It has its own page under Components.'
+    text: >-
+      The robot's second sense is a PIR motion sensor on the Uno. It reacts to body heat moving across its view, so
+      it can tell when I walk into the room, but it can't see someone sitting still. That split the job in two: the
+      PIR for "someone came in", the distance sensor for "someone is at the desk". It has its own page under
+      Components.
+  - date: 11 Nov 2026
+    title: What the robot is for
+    short: 'Wrote down a whole day with the robot: morning briefing, greeting, screens, and a summary at night.'
+    key: true
+    text: >-
+      Wrote down what a day with the robot should look like. When I turn off my phone alarm it says good morning,
+      tells me the weather and reads my plan from my calendar, and plays a song I ask for. When I walk into the
+      room it greets me with what's left of the day, then just shows a face. At the desk I touch its head to talk to
+      it, and small screens on its arms show the weather, my Claude usage and the alarm. At night I say good night
+      and it tells me what I got done. That also gave each sensor its job.
   - date: 9 Nov 2026
     title: One repo, one folder per part
     short: 'One repo for the robot, with a folder per part: sketch, schematic, photo and build log.'
@@ -58,12 +76,12 @@ code: |
   // Planned firmware: one non-blocking module
   // per part. loop() only lets each one run.
   void loop() {
-    senses.update();  // motion, distance, temp, light
-    neck.update();    // pan-tilt servos, smooth moves
-    touch.update();   // capacitive pad on the head
-    face.update();    // two OLED eyes
-    voice.update();   // I2S speaker
-    ears.update();    // keyword spotting (TinyML)
+    motion.update();   // PIR: did someone come in?
+    distance.update(); // HC-SR04: is someone at the desk?
+    touch.update();    // touch pad on the head
+    face.update();     // screen on the head
+    screens.update();  // small screens on the arms
+    voice.update();    // speaker and microphone
   }
 
 problem: >-
@@ -78,39 +96,32 @@ steps:
   - label: 8-LED cascade, the starting point
     state: done
     date: 16 Oct 2026
-  - label: 'Senses: motion, distance, temperature, light'
+  - label: Distance sensor (HC-SR04)
+    state: done
+    date: 11 Nov 2026
+  - label: Motion sensor (PIR)
     state: doing
-  - label: 'Neck: pan-tilt servos'
+  - label: Both sensors working together
     state: next
-  - label: ESP32 and touch on the head
+  - label: Touch on the head
     state: next
-  - label: 'Face: two OLED eyes'
+  - label: Face screen on the head
     state: next
-  - label: 'Voice: I2S speaker'
+  - label: Screens on the arms
     state: next
-  - label: Robot v1 in a clear acrylic body
+  - label: Speaker and microphone
     state: next
-  - label: 'Ears: on-device keywords (TinyML)'
-    state: next
-  - label: Assistant v2 on a Raspberry Pi
+  - label: Phone alarm, calendar, weather and Spotify
     state: next
 
 parts:
-  - name: Arduino Uno, then ESP32-S3
+  - name: Arduino Uno R3 (clone)
     qty: ×1
-  - name: HC-SR04, PIR, DHT11, LDR
-    qty: ×4
-  - name: OLED SSD1306 0.96" (eyes)
-    qty: ×2
-  - name: Pan-tilt bracket + servos
-    qty: ×2
-  - name: Copper tape (touch pad)
+  - name: HC-SR04 distance sensor
     qty: ×1
-  - name: INMP441 microphone
+  - name: HC-SR501 PIR motion sensor
     qty: ×1
-  - name: MAX98357A amp + 3 W speaker
-    qty: ×1
-  - name: Raspberry Pi 5 (assistant, later)
+  - name: ESP32 (next)
     qty: ×1
 
 github: '[GitHub link]'

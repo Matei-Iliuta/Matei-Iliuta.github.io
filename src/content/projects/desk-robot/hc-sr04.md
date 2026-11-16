@@ -7,7 +7,7 @@ parent: desk-robot
 order: 1
 year: 2026
 started: 6 Nov 2026
-lastUpdated: 9 Nov 2026
+lastUpdated: 11 Nov 2026
 stack: [C/C++, Arduino]
 
 hero:
@@ -15,10 +15,20 @@ hero:
   photoCaption: The HC-SR04 on the breadboard, wired to the Uno. 6 Nov 2026
 
 why: >-
-  The robot has to notice when someone sits down in front of it, so it can turn its head towards them. Waking up when I walk into the room is the motion sensor's job. The HC-SR04
+  The robot has to notice when I sit down at the desk, so it can switch to a ready mode. Waking up when I walk into the room is the motion sensor's job. The HC-SR04
   is the simplest way to measure distance, and it teaches something every sensor needs: timing a signal precisely.
 
 devlog:
+  - date: 11 Nov 2026
+    title: Ruler test
+    short: 'Checked it with a ruler and a flat wooden board: about 2 mm off at 10 and 20 cm, about 2 cm at 50 cm.'
+    key: true
+    text: >-
+      Held a flat wooden board at distances measured with a ruler. At 10 cm it settled at 10.26 cm and at 20 cm
+      all five readings were between 20.10 and 20.20 cm, so about 2 mm too far. At 50 cm the readings split into
+      two groups, around 51 and 52.2 cm, probably because the board was not perfectly straight or the wider sound
+      cone caught something nearby. At about 4 cm the readings spread over a centimetre, but "Too close!" showed
+      up every time. Between 5 and 50 cm it is more than precise enough for the robot.
   - date: 9 Nov 2026
     title: '"Too close!" under 10 cm'
     short: 'A warning under 10 cm, checked only for real distances, because the no-echo value -1 is also below 10.'
@@ -102,7 +112,7 @@ lesson: >-
   Check the physical setup before the code. The sensor was too close to the desk, and the desk was answering
   before I was.
 
-progress: 75
+progress: 90
 steps:
   - label: Wire it and read on Serial
     state: done
@@ -123,7 +133,8 @@ steps:
     state: done
     date: 9 Nov 2026
   - label: Ruler test at 10, 20 and 50 cm
-    state: doing
+    state: done
+    date: 11 Nov 2026
   - label: Add it to the robot firmware
     state: next
 
