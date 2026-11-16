@@ -99,7 +99,7 @@ steps:
   - label: Distance sensor (HC-SR04)
     state: done
     date: 11 Nov 2026
-  - label: Motion sensor (PIR)
+  - label: Motion sensor (HC-SR501)
     state: doing
   - label: Both sensors working together
     state: next
@@ -124,5 +124,5 @@ parts:
   - name: ESP32 (next)
     qty: ×1
 
-github: '[GitHub link]'
+github: https://github.com/Matei-Iliuta/desk-robot
 ---

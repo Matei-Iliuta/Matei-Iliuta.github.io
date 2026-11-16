@@ -148,5 +148,5 @@ parts:
   - name: Jumper wires (male-male)
     qty: ×4
 
-github: '[GitHub link]'
+github: https://github.com/Matei-Iliuta/desk-robot/tree/main/components/hc_sr04_distance
 ---

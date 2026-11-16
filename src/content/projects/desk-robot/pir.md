@@ -1,5 +1,5 @@
 ---
-title: Motion sensor (PIR)
+title: Motion sensor (HC-SR501)
 summary: The robot's second sense. A PIR sensor that notices when I walk into the room, so the robot can wake up and greet me.
 keyFacts: ['Sees motion, not presence', 'Edge detection', 'Arduino Uno']
 status: in-progress
@@ -116,5 +116,5 @@ parts:
   - name: Jumper wires (female-male)
     qty: ×3
 
-github: '[GitHub link]'
+github: https://github.com/Matei-Iliuta/desk-robot/tree/main/components/pir_motion
 ---

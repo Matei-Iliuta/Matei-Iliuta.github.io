@@ -240,10 +240,12 @@ const wideCode = Math.max(...p.code.split('\n').map((l) => l.length)) > 56;
                 <li class="part"><span>{part.name}</span><span class="part-qty">{part.qty}</span></li>
               ))}
             </ul>
-            <a href={githubHref} class="github" target="_blank" rel="noopener">
-              View on GitHub
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M8 7h9v9"></path></svg>
-            </a>
+            {githubHref !== '#' && (
+              <a href={githubHref} class="github" target="_blank" rel="noopener">
+                View on GitHub
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M8 7h9v9"></path></svg>
+              </a>
+            )}
           </div>
         </div>
 
