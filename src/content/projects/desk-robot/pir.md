@@ -2,13 +2,28 @@
 title: Motion sensor (HC-SR501)
 summary: The robot's second sense. A PIR sensor that notices when I walk into the room, so the robot can wake up and greet me.
 keyFacts: ['Sees motion, not presence', 'Edge detection', 'Arduino Uno']
-status: in-progress
+status: completed
 parent: desk-robot
 order: 2
 year: 2026
 started: 11 Nov 2026
+finished: 23 Nov 2026
+duration: 13 days
 lastUpdated: 23 Nov 2026
 stack: [C/C++, Arduino]
+
+result: >-
+  The PIR tells the robot when someone walks into the room. It prints one line when motion starts and one when it
+  ends, waits a minute after power-up to calibrate, and now runs together with the distance sensor in Presence,
+  where it greets me only if I'm not already at the desk.
+
+metrics:
+  - value: ~15 s
+    label: hold time after the last motion
+  - value: 60 s
+    label: warm-up after power-up
+  - value: '3'
+    label: wires, straight to the Uno
 
 hero:
   photo: /projects/desk-robot/pir.jpg
@@ -95,7 +110,7 @@ lesson: >-
   A PIR sees motion, not presence. Someone sitting still is invisible to it, so the robot uses the PIR for
   "someone came in" and the distance sensor for "someone is at the desk".
 
-progress: 85
+progress: 100
 steps:
   - label: Wire it and read 0 or 1
     state: done
@@ -115,8 +130,6 @@ steps:
   - label: Work together with the distance sensor
     state: done
     date: 23 Nov 2026
-  - label: Test it in the room
-    state: next
 
 parts:
   - name: Arduino Uno R3 (clone)

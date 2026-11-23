@@ -112,7 +112,7 @@ steps:
     date: 11 Nov 2026
   - label: Motion sensor (HC-SR501)
     state: done
-    date: 16 Nov 2026
+    date: 23 Nov 2026
   - label: Both sensors working together
     state: done
     date: 23 Nov 2026
