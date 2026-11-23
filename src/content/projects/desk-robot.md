@@ -10,8 +10,8 @@ lastUpdated: 23 Nov 2026
 stack: [C/C++, Arduino, ESP32]
 
 hero:
-  photoPlaceholder: '[Photo of the robot, once the first parts come together]'
-  photoCaption: Starting with the senses, one part at a time.
+  photo: /projects/desk-robot/presence.jpg
+  photoCaption: 'The first two senses working together: PIR and distance sensor on one Uno, powered from the breadboard rails. 23 Nov 2026'
 
 why: >-
   After the LED cascade I wanted one big project that pulls everything together instead of many small ones, and
@@ -30,7 +30,7 @@ devlog:
       desk". At first it greeted me again and again while I was typing, because the PIR drops after its 15 s hold
       when I sit still and the next small movement looks like someone walking in. Now it greets only if the
       distance sensor says I'm not already at the desk. Before that, a loose wire gave a constant 0.9 cm reading,
-      which looked exactly like a bug in the code. Code and build log are in the repo under integrations/presence.
+      which looked exactly like a bug in the code. It has its own page under Integrations.
   - date: 15 Nov 2026
     title: 'Second part: the motion sensor'
     short: 'Added a PIR motion sensor that notices when I walk in. It has its own page under Components.'

@@ -39,6 +39,8 @@ const projects = defineCollection({
     order: z.number().default(0),
     // A component page lives inside a bigger project: its folder name (e.g. desk-robot)
     parent: z.string().optional(),
+    // Under the parent page: a single part (component) or parts working together (integration)
+    kind: z.enum(['component', 'integration']).default('component'),
     year: z.number(),
     started: z.string(),
     lastUpdated: z.string().optional(),

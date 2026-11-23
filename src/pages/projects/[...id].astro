@@ -30,8 +30,23 @@ const back = parent
   : done
     ? { href: '/projects/', label: 'Back to Projects' }
     : { href: '/#right-now', label: 'Back to Right now' };
-// Section numbers shift by one when the project has a Components section
-const n = (k: number) => String(k + (children.length && k >= 2 ? 1 : 0)).padStart(2, '0');
+// Parts of a bigger project, shown as folders: single components, then integrations
+const groups = [
+  {
+    label: 'COMPONENTS',
+    items: children.filter((c) => c.data.kind === 'component'),
+    count: (k: number) => `one folder per part · ${k} so far`,
+    lead: 'Every part is built and understood on its own first, then added to the robot.',
+  },
+  {
+    label: 'INTEGRATIONS',
+    items: children.filter((c) => c.data.kind === 'integration'),
+    count: (k: number) => `parts working together · ${k} so far`,
+    lead: 'Parts that already work on their own, now in one sketch and helping each other.',
+  },
+].filter((g) => g.items.length > 0);
+// Section numbers shift by one for each folder section above the devlog
+const n = (k: number) => String(k + (k >= 2 ? groups.length : 0)).padStart(2, '0');
 const nextLabel = parent ? (next.id === project.id ? '' : 'Next part →') : 'Next project →';
 const devlogCount = p.devlog.length + (done && p.finalEntry ? 1 : 0);
 // Long logs start folded: the newest entries show, the rest open with a button
@@ -249,15 +264,15 @@ const wideCode = Math.max(...p.code.split('\n').map((l) => l.length)) > 56;
           </div>
         </div>
 
-        {children.length > 0 && (
+        {groups.map((g, gi) => (
           <section class="section section--parts">
             <div class="devlog-head">
-              <h2 class="label">02 / COMPONENTS</h2>
-              <span class="devlog-count">one folder per part · {children.length} so far</span>
+              <h2 class="label">{String(2 + gi).padStart(2, '0')} / {g.label}</h2>
+              <span class="devlog-count">{g.count(g.items.length)}</span>
             </div>
-            <p class="parts-lead">Every part is built and understood on its own first, then added to the robot.</p>
+            <p class="parts-lead">{g.lead}</p>
             <ul class="folders">
-              {children.map((c, i) => (
+              {g.items.map((c, i) => (
                 <li>
                   <a class="folder" href={`/projects/${c.id}/`}>
                     <span class="folder-icon" aria-hidden="true">
@@ -279,7 +294,7 @@ const wideCode = Math.max(...p.code.split('\n').map((l) => l.length)) > 56;
               ))}
             </ul>
           </section>
-        )}
+        ))}
 
         <section class="section section--devlog">
           <div class="devlog-head">
