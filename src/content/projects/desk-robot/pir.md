@@ -7,7 +7,7 @@ parent: desk-robot
 order: 2
 year: 2026
 started: 11 Nov 2026
-lastUpdated: 16 Nov 2026
+lastUpdated: 23 Nov 2026
 stack: [C/C++, Arduino]
 
 hero:
@@ -20,6 +20,14 @@ why: >-
   presence, which is why the robot needs both this sensor and the distance sensor.
 
 devlog:
+  - date: 23 Nov 2026
+    title: Working with the distance sensor
+    short: 'Now on one Uno with the HC-SR04. It greets me only if I am not already at the desk.'
+    text: >-
+      The PIR now runs together with the distance sensor, with a 60 s warm-up in setup(). Sitting still at the
+      desk, the PIR drops after its 15 s hold and the next small movement looked like someone walking in, so it
+      kept saying "Welcome back!". Now it greets only when the distance sensor says I'm not already at the desk.
+      More on the Desk Robot page.
   - date: 16 Nov 2026
     title: Schematic with my own symbol
     short: 'Drew the wiring in KiCad 10 with an HC-SR501 symbol I made myself. ERC clean.'
@@ -87,7 +95,7 @@ lesson: >-
   A PIR sees motion, not presence. Someone sitting still is invisible to it, so the robot uses the PIR for
   "someone came in" and the distance sensor for "someone is at the desk".
 
-progress: 60
+progress: 85
 steps:
   - label: Wire it and read 0 or 1
     state: done
@@ -101,11 +109,13 @@ steps:
   - label: Schematic in KiCad 10, ERC clean
     state: done
     date: 16 Nov 2026
-  - label: Test it in the room
-    state: next
   - label: Handle the one-minute warm-up
-    state: next
+    state: done
+    date: 23 Nov 2026
   - label: Work together with the distance sensor
+    state: done
+    date: 23 Nov 2026
+  - label: Test it in the room
     state: next
 
 parts:

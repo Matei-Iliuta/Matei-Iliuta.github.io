@@ -1,12 +1,12 @@
 ---
 title: Desk Robot
 summary: A personal assistant robot for my desk that keeps track of my day with me. It greets me in the morning and when I walk in, shows a face and small screens, and sums up my day at night.
-keyFacts: ['Built part by part', '2 sensors so far', 'Arduino Uno, then ESP32']
+keyFacts: ['Built part by part', '2 sensors working together', 'Arduino Uno, then ESP32']
 status: in-progress
 order: 3
 year: 2026
 started: 3 Nov 2026
-lastUpdated: 15 Nov 2026
+lastUpdated: 23 Nov 2026
 stack: [C/C++, Arduino, ESP32]
 
 hero:
@@ -20,6 +20,17 @@ why: >-
   Each part teaches one new piece of embedded work, and the robot is where they have to work together.
 
 devlog:
+  - date: 23 Nov 2026
+    title: 'Two parts working together: presence'
+    short: 'PIR and distance sensor on one Uno: it greets me when I walk in and knows when I sit down or leave the desk.'
+    key: true
+    text: >-
+      First time two parts work together. Both sensors on one Uno, powered from the breadboard rails: walking in
+      prints "Welcome back!", sitting down closer than 50 cm prints "You sat down", getting up prints "You left the
+      desk". At first it greeted me again and again while I was typing, because the PIR drops after its 15 s hold
+      when I sit still and the next small movement looks like someone walking in. Now it greets only if the
+      distance sensor says I'm not already at the desk. Before that, a loose wire gave a constant 0.9 cm reading,
+      which looked exactly like a bug in the code. Code and build log are in the repo under integrations/presence.
   - date: 15 Nov 2026
     title: 'Second part: the motion sensor'
     short: 'Added a PIR motion sensor that notices when I walk in. It has its own page under Components.'
@@ -91,7 +102,7 @@ lesson: >-
   Build and understand one part at a time on the breadboard, then add it to the robot as a clean module and
   check that everything that already worked still works.
 
-progress: 15
+progress: 25
 steps:
   - label: 8-LED cascade, the starting point
     state: done
@@ -100,9 +111,11 @@ steps:
     state: done
     date: 11 Nov 2026
   - label: Motion sensor (HC-SR501)
-    state: doing
+    state: done
+    date: 16 Nov 2026
   - label: Both sensors working together
-    state: next
+    state: done
+    date: 23 Nov 2026
   - label: Touch on the head
     state: next
   - label: Face screen on the head
